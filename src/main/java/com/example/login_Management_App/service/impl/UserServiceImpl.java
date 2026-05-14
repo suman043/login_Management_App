@@ -5,15 +5,18 @@ import com.example.login_Management_App.repository.UserRepository;
 import com.example.login_Management_App.service.UserService;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
-	public UserServiceImpl(UserRepository userRepository) {
+	public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
@@ -34,6 +37,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public AppUser createUser(AppUser user) {
 		user.setId(null);
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		return userRepository.save(user);
 	}
 
@@ -42,7 +46,7 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findById(id)
 				.map(existingUser -> {
 					existingUser.setUsername(user.getUsername());
-					existingUser.setPassword(user.getPassword());
+					existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
 					return userRepository.save(existingUser);
 				});
 	}
